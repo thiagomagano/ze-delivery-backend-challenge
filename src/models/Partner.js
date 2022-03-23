@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
-const { Schema } = mongoose
 
-const pointSchema = new mongoose.Schema({
+
+const PointSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: ['Point'],
@@ -9,11 +9,12 @@ const pointSchema = new mongoose.Schema({
   },
   coordinates: {
     type: [Number],
-    required: true
+    required: true,
+    index: '2dsphere'
   }
 });
 
-const multiSchema = new mongoose.Schema({
+const MultiSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: ['MultiPolygon'],
@@ -21,19 +22,18 @@ const multiSchema = new mongoose.Schema({
   },
   coordinates: {
     type: [[[[Number]]]],
-    required: true
+    required: true,
+    index: '2dsphere'
   }
 });
 
-const partnerSchema = new Schema({
-  id: Number,
+const PartnerSchema = new mongoose.Schema({
+  id: { type: Number, required: true, unique: true },
   tradingName: String,
   ownerName: String,
-  document: { type: String, index: true },
-  covaregeArea: multiSchema,
-  address: pointSchema
+  document: { type: String, unique: true },
+  covaregeArea: MultiSchema,
+  address: PointSchema
 })
 
-const Partner = mongoose.model('Partner', partnerSchema)
-
-module.exports = Partner
+module.exports = mongoose.model('Partner', PartnerSchema)
