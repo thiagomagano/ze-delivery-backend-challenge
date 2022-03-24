@@ -24,49 +24,47 @@ const findPolygons = (multiPolygons) => {
   //return array
 }
 
-const isPointInPolygon = (point, polygons) => {
-  return geolib.isPointInPolygon(point, polygons)
+const isCovarage = (point, covarageArea) => {
+  return geolib.isPointInPolygon(point, covarageArea)
 }
 
 
 const getCoveragePdvs = (point, pdvs) => {
-  covaragePdvs = pdvs.filter((pdv) => {
-    const covarageData = pdv.coverageArea.coordinates[0][0]
 
-    if (geolib.isPointInPolygon(point, covarageData)) {
-      return true
-    } else {
-      return false
-    }
+  covaragePdvs = pdvs.filter((pdv) => {
+    const covarageData = pdv.coverageArea.coordinates[0][0];
+
+    return isCovarage(point, covarageData) ? true : false;
+
   })
 
   return covaragePdvs
 }
 
 const findNearest = (point, pdvs) => {
-  const covaragepdvs = getCoveragePdvs(point, pdvs);
-  let nearestDistance = 999999999;
-  let nearestPdv;
+  //const covaragepdvs = getCoveragePdvs(point, pdvs);
+  let nearestDistance, nearestPdv;
 
-  covaragepdvs.map((pdv => {
+
+  pdvs.map((pdv => {
     const pdvPoint = pdv.address.coordinates
     const distance = geolib.getDistance(point, pdvPoint)
 
-
+    if (!nearestDistance) {
+      nearestDistance = distance
+      nearestPdv = pdv;
+    }
     if (distance < nearestDistance) {
       nearestDistance = distance
       nearestPdv = pdv;
     }
-    console.log(distance);
   }))
 
   return nearestPdv;
 }
 
-console.log(findNearest(pointExample, data.pdvs));
-
 module.exports = {
-  isPointInPolygon,
+  isCovarage,
   getCoveragePdvs,
   findNearest
 }

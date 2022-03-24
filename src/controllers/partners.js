@@ -1,5 +1,5 @@
 const Partner = require('../models/Partner');
-const geolib = require('geolib');
+const { isCovarage, getCoveragePdvs, findNearest } = require('../tests/tests');
 
 
 
@@ -48,7 +48,7 @@ exports.getPartnerById = async (req, res, next) => {
 
 exports.createPartner = async (req, res, next) => {
   const { id, tradingName, ownerName, document } = req.body
-  const covaregeArea = req.body['coverageArea']
+  const coverageArea = req.body['coverageArea']
   const address = req.body['address']
 
   //Cria um objeto para armazenar esses parametros
@@ -57,7 +57,7 @@ exports.createPartner = async (req, res, next) => {
     tradingName,
     ownerName,
     document,
-    covaregeArea,
+    coverageArea,
     address
   }
 
@@ -80,25 +80,27 @@ exports.createPartner = async (req, res, next) => {
 exports.SearchNearbyPartner = async (req, res, next) => {
   const { location } = req.body
   const partners = await Partner.find()
+  let partnerFound;
+  //console.log(partners);
 
-  partners.map((partner) => {
-    const covarageArea = partner.covaregeArea.coordinates;
+  try {
 
-    console.log(geolib.isPointInPolygon(location, covarageArea));
-  })
+    const covaragePdvs = await getCoveragePdvs(location, partners);
 
+    if (covaragePdvs) {
+      if (covaragePdvs.length > 1) {
+        partnerFound = findNearest(location, covaragePdvs)
+      } else {
+        partnerFound = covaragePdvs;
+      }
+    }
+    res.status(200).json({
+      message: 'sucess',
+      dataFind: partnerFound
+    })
 
-
-  res.status(200).json({ message: "Partner Found with sucess", data: partners })
-
-  // try {
-  //   // utiliza o metodo de insersação no banco de dados do mongoose
-  //   await Partner.create(partner)
-  //   //retorn uma resposta ao client
-  //   res.status(200).json({ message: "Partner Found with sucess" })
-  // } catch (err) {
-  //   // Em caso de erro, mostra o erro no console e para o client
-  //   console.log(err)
-  //   res.status(500).send({ error: err })
-  // }
+  } catch (err) {
+    console.log(err)
+    res.status(404).json({ message: "Not found covarage for this adress", error: err })
+  }
 }

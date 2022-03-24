@@ -18,7 +18,7 @@ const MultiSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: ['MultiPolygon'],
-    required: true
+    required: true,
   },
   coordinates: {
     type: [[[[Number]]]],
@@ -32,7 +32,7 @@ const PartnerSchema = new mongoose.Schema({
   tradingName: String,
   ownerName: String,
   document: { type: String, unique: true },
-  covaregeArea: MultiSchema,
+  coverageArea: MultiSchema,
   address: PointSchema
 })
 
